@@ -5,20 +5,19 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# Make sure app/ is on the path so models can be imported
+# Ensure app/ is importable from alembic/
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.config import settings
-from app.database import Base  # noqa: F401 — import Base so Alembic can see metadata
+from app.database import Base
 
-# Import all models so their tables are registered on Base.metadata
-# Add new models here as they are created in later tickets
-# from app.models.document import Document  (added in T0.2)
+# Import all models so their tables are registered on Base.metadata before
+# autogenerate runs. Add new models here as they are created in later tickets.
+import app.models  # noqa: F401 — side-effect import registers all three models
 
 config = context.config
 
-# Override sqlalchemy.url with the value from our settings, so we never have
-# two sources of truth for the database connection string.
+# Single source of truth for the DB URL — never duplicated in alembic.ini
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 if config.config_file_name is not None:
