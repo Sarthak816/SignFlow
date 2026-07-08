@@ -1,0 +1,45 @@
+# ── Python / Backend ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Alembic ───────────────────────────────────────────────────────────────────
+# Keep versions/ tracked; ignore any local .pyc inside it
+backend/alembic/versions/*.pyc
+
+# ── Local file storage (uploaded PDFs) ───────────────────────────────────────
+backend/uploads/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
