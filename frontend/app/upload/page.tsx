@@ -34,7 +34,7 @@ export default function UploadPage() {
     }
     if (f.size > 10 * 1024 * 1024) {
       const mb = (f.size / (1024 * 1024)).toFixed(1);
-      setFileError(`This file is ${mb}MB — the limit is 10MB. Choose a smaller PDF.`);
+      setFileError(`This file is ${mb}MB. The limit is 10MB. Choose a smaller PDF.`);
       return;
     }
     setFile(f);

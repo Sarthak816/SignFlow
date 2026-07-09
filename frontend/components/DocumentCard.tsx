@@ -71,7 +71,7 @@ export default function DocumentCard({
           </p>
         )}
         <p className="text-mono text-[var(--color-ink-muted)]">
-          {refreshFailed ? "Refresh failed — " : ""}
+          {refreshFailed ? "Refresh failed. " : ""}
           Last updated {formatDistanceToNow(updatedAt)} ago
         </p>
         {signer?.signer_url && status === "pending" && (

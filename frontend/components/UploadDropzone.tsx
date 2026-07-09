@@ -38,7 +38,7 @@ export default function UploadDropzone({ onFileSelected, disabled, error }: Uplo
     <div
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label="Upload PDF — drag and drop or click to browse"
+      aria-label="Upload PDF: drag and drop or click to browse"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

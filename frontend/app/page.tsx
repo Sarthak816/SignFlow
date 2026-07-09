@@ -32,7 +32,7 @@ export default function LandingPage() {
             Get contracts signed.<br />Track every step.
           </h1>
           <p className="text-body text-[var(--color-ink-muted)] mb-[40px] max-w-[480px]">
-            Upload a PDF, send it for Aadhaar-based e-signature, and download the signed document — with a full status trail, no chasing required.
+            Upload a PDF, send it for Aadhaar-based e-signature, and download the signed document. Full status trail included, no chasing required.
           </p>
 
           {!isLoaded ? null : isSignedIn ? (
