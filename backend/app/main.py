@@ -1,7 +1,13 @@
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import settings
+from app.routers import upload
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="SignFlow API",
@@ -10,7 +16,7 @@ app = FastAPI(
 )
 
 # CORS — only the configured frontend origin is allowed.
-# Never use allow_origins=["*"] on a backend that handles file uploads and signature data.
+# Never use allow_origins=["*"] on a backend that handles uploads and signature data.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.FRONTEND_URL],
@@ -19,8 +25,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(upload.router)
+
+
+# ── Global exception handler ──────────────────────────────────────────────────
+# Catches any unhandled exception and returns a generic message.
+# Stack traces and DB errors NEVER reach the browser (security + UX).
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Something went wrong. Please try again shortly."},
+    )
+
 
 @app.get("/health", tags=["health"])
 def health_check():
-    """Health check endpoint for deployment monitoring and uptime verification."""
+    """Health check endpoint for deployment monitoring."""
     return {"status": "ok"}
