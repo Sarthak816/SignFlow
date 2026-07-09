@@ -67,7 +67,10 @@ async def upload_document(filename: str, file_bytes: bytes) -> dict:
             response = await client.post(
                 url,
                 headers=_headers(),
-                data={"payload": f'{{"name": "{filename}"}}'},
+                # Setu expects `name` as a plain form field and `document` as the file part.
+                # The spec doc showing `payload` as a JSON string is incorrect —
+                # verified against the live sandbox: Format 3 (name direct + document key) returns 201.
+                data={"name": filename},
                 files={"document": (filename, file_bytes, "application/pdf")},
             )
     except httpx.TimeoutException:

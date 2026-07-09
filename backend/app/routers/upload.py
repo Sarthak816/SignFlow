@@ -117,19 +117,25 @@ async def upload_contract(
     db.flush()  # get doc.id without committing yet
 
     # ── 6. Create signature request on Setu ───────────────────────────────────
-    effective_redirect = redirect_url or f"{settings.FRONTEND_URL}/status"
+    # redirectUrl must be a publicly accessible URL — Setu validates it.
+    # For local dev we use a setu-provided test redirect; in production use the real frontend URL.
+    effective_redirect = redirect_url or (
+        settings.FRONTEND_URL
+        if not settings.FRONTEND_URL.startswith("http://localhost")
+        else "https://setu.co"  # sandbox placeholder for local development
+    )
 
     signers_payload = [
         {
             "identifier": cleaned_identifier,
+            "displayName": signer_display_name or "Signer",  # Setu requires displayName
             "signerNo": 1,
             "signature": {
-                "onPages": "all",
+                "onPages": ["1"],  # Setu requires a list, not the string "all"
                 "position": "bottom-right",
                 "height": 60,
                 "width": 180,
             },
-            **({"displayName": signer_display_name} if signer_display_name else {}),
         }
     ]
 
