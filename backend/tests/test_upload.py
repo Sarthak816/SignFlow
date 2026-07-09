@@ -1,50 +1,15 @@
 """
 Tests for POST /api/upload-contract
-
-Uses FastAPI TestClient with an in-memory SQLite DB and mocked Setu calls.
+Uses conftest.py for shared in-memory SQLite DB and auth override.
 """
 
 import io
-import pytest
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker
 
 from app.main import app
-from app.database import Base, get_db
 from app.auth import get_current_user_id
-
-# ── In-memory SQLite for tests ────────────────────────────────────────────────
-SQLALCHEMY_TEST_URL = "sqlite://"
-engine = create_engine(
-    SQLALCHEMY_TEST_URL,
-    connect_args={"check_same_thread": False},
-)
-
-# Keep a single connection open for the duration of all tests so the
-# in-memory DB (and its tables) persists across requests
-connection = engine.connect()
-TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=connection)
-
-# Create all tables on the shared connection
-Base.metadata.create_all(bind=connection)
-
-
-def override_get_db():
-    db = TestingSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def override_auth():
-    return "test-user-id"
-
-
-app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[get_current_user_id] = override_auth
+import tests.conftest  # ensure overrides are applied  # noqa: F401
 
 client = TestClient(app)
 
@@ -78,8 +43,6 @@ def _upload(file_bytes=FAKE_PDF, signer="9876543210", display_name=None):
     )
 
 
-# ── Happy path ────────────────────────────────────────────────────────────────
-
 def test_upload_contract_success():
     with (
         patch("app.routers.upload.setu_client.upload_document", new_callable=AsyncMock, return_value=SETU_DOC_RESPONSE),
@@ -95,8 +58,6 @@ def test_upload_contract_success():
     assert body["status"] == "pending"
     assert body["signer_url"] == "https://dg-sandbox.setu.co/sign/abc123"
 
-
-# ── Validation failures ───────────────────────────────────────────────────────
 
 def test_upload_rejects_non_pdf():
     response = _upload(file_bytes=b"not a pdf at all")
@@ -116,8 +77,6 @@ def test_upload_rejects_invalid_mobile():
     assert response.status_code == 422
     assert "mobile" in response.json()["detail"].lower()
 
-
-# ── Setu failure handling ─────────────────────────────────────────────────────
 
 def test_upload_setu_upload_fails_returns_502():
     from app.services.setu_client import SetuAPIError
@@ -140,12 +99,11 @@ def test_upload_setu_sig_fails_returns_502():
     assert response.status_code == 502
 
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
-
 def test_upload_requires_auth():
     del app.dependency_overrides[get_current_user_id]
     try:
         response = _upload()
         assert response.status_code == 401
     finally:
+        from tests.conftest import override_auth
         app.dependency_overrides[get_current_user_id] = override_auth

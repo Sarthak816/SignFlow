@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import settings
-from app.routers import upload
+from app.routers import upload, signature_status, download
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,8 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(upload.router)
+app.include_router(signature_status.router)
+app.include_router(download.router)
 
 
 # ── Global exception handler ──────────────────────────────────────────────────
