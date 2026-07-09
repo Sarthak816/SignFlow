@@ -63,13 +63,11 @@ async def upload_document(filename: str, file_bytes: bytes) -> dict:
     url = f"{_base()}/api/documents"
 
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 url,
                 headers=_headers(),
                 # Setu expects `name` as a plain form field and `document` as the file part.
-                # The spec doc showing `payload` as a JSON string is incorrect —
-                # verified against the live sandbox: Format 3 (name direct + document key) returns 201.
                 data={"name": filename},
                 files={"document": (filename, file_bytes, "application/pdf")},
             )
@@ -145,7 +143,7 @@ async def create_signature_request(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 url,
                 headers={**_headers(), "Content-Type": "application/json"},
