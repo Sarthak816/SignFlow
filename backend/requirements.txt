@@ -1,17 +1,17 @@
-# SignFlow backend dependencies
-# Pin exact versions for reproducible builds
+# SignFlow backend dependencies — pinned for reproducible builds
 
-fastapi==0.115.5
-uvicorn[standard]==0.32.1
-pydantic==2.10.3
-pydantic-settings==2.6.1
-sqlalchemy==2.0.36
-alembic==1.14.0
-psycopg2-binary==2.9.10
+fastapi==0.139.0
+uvicorn[standard]==0.34.3
+pydantic==2.13.4
+pydantic-settings==2.14.2
+sqlalchemy==2.0.51
+alembic==1.18.5
+psycopg2-binary==2.9.12
 httpx==0.28.1
-python-multipart==0.0.19
-clerk-backend-api==1.7.0
-python-dotenv==1.0.1
-pytest==8.3.4
-pytest-asyncio==0.24.0
-httpx==0.28.1
+python-multipart==0.0.20
+clerk-backend-api==6.0.1
+PyJWT[crypto]==2.13.0
+cryptography==48.0.1
+python-dotenv==1.2.2
+pytest==8.4.1
+pytest-asyncio==0.26.0

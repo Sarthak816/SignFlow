@@ -24,6 +24,10 @@ class Settings(BaseSettings):
 
     # Clerk — backend session verification
     CLERK_SECRET_KEY: str = ""
+    # JWKS URL for verifying Clerk JWTs — format:
+    # https://<your-instance>.clerk.accounts.dev/.well-known/jwks.json
+    # Found in Clerk dashboard → API Keys → Advanced
+    CLERK_JWKS_URL: str = "https://steady-dory-48.clerk.accounts.dev/.well-known/jwks.json"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
