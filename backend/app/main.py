@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,12 @@ from fastapi.responses import JSONResponse
 from app.config import settings
 from app.routers import upload, signature_status, download
 
+# Configure logging to stdout so Render captures it
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    stream=sys.stdout,
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -36,7 +43,13 @@ app.include_router(download.router)
 # Stack traces and DB errors NEVER reach the browser (security + UX).
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+    import traceback
+    logger.error(
+        "Unhandled exception on %s %s\n%s",
+        request.method,
+        request.url.path,
+        traceback.format_exc(),
+    )
     return JSONResponse(
         status_code=500,
         content={"error": "Something went wrong. Please try again shortly."},

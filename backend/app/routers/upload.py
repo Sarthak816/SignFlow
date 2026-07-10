@@ -63,6 +63,9 @@ async def upload_contract(
     owner_id: str = Depends(get_current_user_id),
 ):
     # ── 1. Read and validate the uploaded file ────────────────────────────────
+    import logging
+    _log = logging.getLogger(__name__)
+    _log.info("Upload request received from owner %s, file: %s", owner_id[:8], file.filename)
     file_bytes = await file.read()
     filename = file.filename or "document.pdf"
 
