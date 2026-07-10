@@ -60,3 +60,15 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 def health_check():
     """Health check endpoint for deployment monitoring."""
     return {"status": "ok"}
+
+
+@app.get("/debug-config", tags=["health"])
+def debug_config():
+    """Temporary: verify env vars loaded correctly on Render. Remove after fix."""
+    return {
+        "setu_client_id_prefix": settings.SETU_CLIENT_ID[:8] if settings.SETU_CLIENT_ID else "MISSING",
+        "setu_secret_len": len(settings.SETU_CLIENT_SECRET),
+        "setu_product_id_prefix": settings.SETU_PRODUCT_INSTANCE_ID[:8] if settings.SETU_PRODUCT_INSTANCE_ID else "MISSING",
+        "setu_base_url": settings.SETU_BASE_URL,
+        "environment": settings.ENVIRONMENT,
+    }
