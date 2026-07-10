@@ -62,13 +62,21 @@ def health_check():
     return {"status": "ok"}
 
 
-@app.get("/debug-config", tags=["health"])
-def debug_config():
-    """Temporary: verify env vars loaded correctly on Render. Remove after fix."""
-    return {
-        "setu_client_id_prefix": settings.SETU_CLIENT_ID[:8] if settings.SETU_CLIENT_ID else "MISSING",
-        "setu_secret_len": len(settings.SETU_CLIENT_SECRET),
-        "setu_product_id_prefix": settings.SETU_PRODUCT_INSTANCE_ID[:8] if settings.SETU_PRODUCT_INSTANCE_ID else "MISSING",
-        "setu_base_url": settings.SETU_BASE_URL,
-        "environment": settings.ENVIRONMENT,
-    }
+@app.get("/debug-setu", tags=["health"])
+async def debug_setu():
+    """Temporary: test Setu upload directly and return exact error."""
+    import httpx
+    from app.services.setu_client import _headers, _base
+    fake_pdf = b"%PDF-1.4 test"
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.post(
+            f"{_base()}/api/documents",
+            headers=_headers(),
+            data={"name": "test.pdf"},
+            files={"document": ("test.pdf", fake_pdf, "application/pdf")},
+        )
+        return {
+            "status_code": r.status_code,
+            "response": r.text[:500],
+            "headers_sent": dict(r.request.headers),
+        }
