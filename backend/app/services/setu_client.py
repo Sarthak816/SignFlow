@@ -19,8 +19,11 @@ sandbox responses, stop and report the discrepancy — do not adapt silently.
 """
 
 import httpx
+import logging
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class SetuAPIError(Exception):
@@ -36,11 +39,16 @@ def _headers() -> dict[str, str]:
     Build Setu auth headers. These three values never leave this file.
     Grep the rest of the codebase for SETU_CLIENT_ID / SETU_CLIENT_SECRET /
     SETU_PRODUCT_INSTANCE_ID — you should find zero matches outside this file.
+
+    User-Agent is set explicitly because some WAFs (including Setu's sandbox
+    gateway) block the default "python-httpx/<version>" UA. A descriptive
+    product UA avoids this class of 403 without touching any auth logic.
     """
     return {
         "x-client-id": settings.SETU_CLIENT_ID,
         "x-client-secret": settings.SETU_CLIENT_SECRET,
         "x-product-instance-id": settings.SETU_PRODUCT_INSTANCE_ID,
+        "User-Agent": "SignFlow-Backend/1.0",
     }
 
 
@@ -81,11 +89,18 @@ async def upload_document(filename: str, file_bytes: bytes) -> dict:
         )
 
     if not response.is_success:
+        logger.error(
+            "Setu upload_document failed: url=%s status=%s body=%.200s",
+            url,
+            response.status_code,
+            response.text,
+        )
         raise SetuAPIError(
             "Document upload failed. Please try again.",
             status_code=response.status_code,
         )
 
+    logger.info("Setu upload_document succeeded: status=%s", response.status_code)
     return response.json()
 
 
@@ -159,11 +174,18 @@ async def create_signature_request(
         )
 
     if not response.is_success:
+        logger.error(
+            "Setu create_signature_request failed: url=%s status=%s body=%.200s",
+            url,
+            response.status_code,
+            response.text,
+        )
         raise SetuAPIError(
             "Signature request creation failed. Please try again.",
             status_code=response.status_code,
         )
 
+    logger.info("Setu create_signature_request succeeded: status=%s", response.status_code)
     return response.json()
 
 
@@ -207,6 +229,12 @@ async def get_signature_status(setu_signature_id: str) -> dict:
         )
 
     if not response.is_success:
+        logger.error(
+            "Setu get_signature_status failed: url=%s status=%s body=%.200s",
+            url,
+            response.status_code,
+            response.text,
+        )
         raise SetuAPIError(
             "Status check failed. Please try again.",
             status_code=response.status_code,

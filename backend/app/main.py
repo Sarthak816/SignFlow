@@ -61,22 +61,3 @@ def health_check():
     """Health check endpoint for deployment monitoring."""
     return {"status": "ok"}
 
-
-@app.get("/debug-setu", tags=["health"])
-async def debug_setu():
-    """Temporary: test Setu upload directly and return exact error."""
-    import httpx
-    from app.services.setu_client import _headers, _base
-    fake_pdf = b"%PDF-1.4 test"
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        r = await client.post(
-            f"{_base()}/api/documents",
-            headers=_headers(),
-            data={"name": "test.pdf"},
-            files={"document": ("test.pdf", fake_pdf, "application/pdf")},
-        )
-        return {
-            "status_code": r.status_code,
-            "response": r.text[:500],
-            "headers_sent": dict(r.request.headers),
-        }
