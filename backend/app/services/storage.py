@@ -1,33 +1,29 @@
 """
 File storage abstraction.
 
-Local disk for MVP. To swap to S3-compatible storage later,
-change only this file — no other code needs to change.
+Uses /tmp for cloud deployments (Render/Railway) where the app directory
+is read-only. For local dev, also uses /tmp to keep things consistent.
+
+To swap to S3-compatible storage later, change only this file.
 """
 
-import os
 import uuid
+import tempfile
 from pathlib import Path
-
-# Base upload directory — excluded from git via .gitignore
-UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"
-
-
-def _ensure_upload_dir() -> None:
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def save_file(file_bytes: bytes, filename: str) -> str:
     """
-    Save file_bytes to disk under a UUID-based filename.
+    Save file_bytes to a temp directory.
 
     Returns the file path string (stored in documents.file_path).
-    Using a UUID prefix prevents filename collisions and avoids
-    exposing original filenames in the filesystem.
+    Using a UUID prefix prevents filename collisions.
     """
-    _ensure_upload_dir()
+    tmp_dir = Path(tempfile.gettempdir()) / "signflow_uploads"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+
     unique_name = f"{uuid.uuid4()}_{filename}"
-    file_path = UPLOAD_DIR / unique_name
+    file_path = tmp_dir / unique_name
     file_path.write_bytes(file_bytes)
     return str(file_path)
 
