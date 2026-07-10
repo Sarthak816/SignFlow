@@ -39,6 +39,36 @@ from app.utils.validators import validate_pdf
 router = APIRouter(prefix="/api", tags=["upload"])
 
 
+def _setu_safe_filename(filename: str) -> str:
+    """
+    Setu's upload_document endpoint rejects filenames containing characters
+    outside a conservative ASCII-ish set. Confirmed trigger: an en dash '–'
+    (U+2013) in the filename causes a 400 invalid_payload,
+    "illegal characters: name".
+
+    We keep the user's original filename everywhere else (DB row,
+    API response, on-disk path) and only sanitize the copy sent to Setu.
+    """
+    import re
+    import unicodedata
+
+    stem, dot, ext = filename.rpartition(".")
+    if not dot:
+        stem, ext = filename, ""
+
+    # Normalize unicode punctuation (en/em dash, curly quotes, etc.) to a
+    # closest ASCII equivalent rather than dropping it, so e.g.
+    # "2026–2027" becomes "2026-2027" instead of "20262027".
+    normalized = unicodedata.normalize("NFKD", stem)
+    normalized = normalized.replace("\u2013", "-").replace("\u2014", "-")  # – —
+    normalized = normalized.encode("ascii", "ignore").decode("ascii")
+
+    safe_stem = re.sub(r"[^A-Za-z0-9 ._-]", "", normalized).strip()
+    safe_stem = safe_stem or "document"
+
+    return f"{safe_stem}.{ext}" if ext else safe_stem
+
+
 class UploadContractResponse(DocumentResponse):
     """Extended response that includes the signature request created in the same call."""
     signature_request_id: uuid.UUID
@@ -86,8 +116,11 @@ async def upload_contract(
     file_path = storage.save_file(file_bytes, filename)
 
     # ── 4. Upload document to Setu ────────────────────────────────────────────
+    # NOTE: send the sanitized filename to Setu (it rejects some unicode
+    # punctuation, e.g. en dashes), but keep filename as the user's real
+    # original name for the document row / response below.
     try:
-        setu_doc = await setu_client.upload_document(filename, file_bytes)
+        setu_doc = await setu_client.upload_document(_setu_safe_filename(filename), file_bytes)
     except SetuAPIError as e:
         # File saved but Setu upload failed — persist document row with failure note
         doc = Document(
