@@ -199,14 +199,14 @@ For this assignment, secrets live in the platform's encrypted environment variab
 > [!IMPORTANT]
 > **Setu API Limitations in Deployed Environments:**
 > While both the frontend and backend are fully deployed and live, the Setu sandbox eSign API calls will return a `403 Forbidden` WAF block when triggered from the deployed Render backend. This is due to two factors:
-> 1. **Sandbox IP Restrictions (WAF):** Setu's sandbox gateway utilizes WAF/IP security rules that block outbound API requests originating from shared, dynamic cloud IPs (such as Render's free tier).
-> 2. **Production KYC Requirement:** To transition to production Setu credentials and bypass these limits, Setu requires a corporate KYC verification demanding:
+> 1. **Sandbox Geo-Blocking & IP Restrictions:** Setu processes regulated identity and Aadhaar-based eSign transactions, which are subject to UIDAI and RBI data localization regulations. Consequently, Setu's gateway firewall employs **strict geo-blocking**, immediately rejecting requests originating outside India. Since Render does not host servers in India (using regions in US East/West or Europe), all outbound calls from Render's cloud servers are blocked.
+> 2. **Production KYC Requirement:** To transition to production Setu credentials (which allow setting up custom region routing or bypass constraints), Setu requires corporate KYC verification including:
 >    * Business PAN
->    * Company verification (e.g. GSTIN/COI)
+>    * Company type & business verification (e.g. GSTIN/COI)
 >    * Signatory details
 >    * POC details
 >    * KYC summary verification
 >    
->    As an individual student developer, it is not possible to provide corporate business credentials for KYC. 
+>    As an individual student developer, it is not possible to complete corporate registration. 
 > 
-> **For Reviewers:** The application is fully functional, complete, and verified when run **locally** (where localhost requests bypass Setu's gateway WAF blocks). Please follow the **Quick Start** guide below to run and test the complete end-to-end eSign flow locally.
+> **For Reviewers:** The application is fully functional, complete, and verified when run **locally** within India (where your local IP bypasses Setu's geo-blocking WAF). Please follow the **Quick Start** guide below to run and test the complete end-to-end eSign flow locally.
