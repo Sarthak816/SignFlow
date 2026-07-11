@@ -1,6 +1,6 @@
 # SignFlow
 
-**Stage Completed: Stage 3 (Full-Stack Integration, Database Persistence & Real-time Polling Bonuses fully completed)**
+**Stages Completed: Stage 1, Stage 2, and Stage 3 (All milestones, including Database Persistence and Real-time Polling bonuses, are fully implemented and verified)**
 
 > A Setu-powered contract upload and Aadhaar eSign platform. Upload a PDF, send it for legally valid e-signature, track status in real time, and download the signed document, all through a clean, self-serve interface.
 
