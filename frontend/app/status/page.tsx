@@ -34,6 +34,22 @@ export default function StatusPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Real-time polling for pending signature requests
+  useEffect(() => {
+    const pendingDocs = documents.filter(
+      (doc) => doc.status === "pending" && doc.signature_request_id
+    );
+    if (pendingDocs.length === 0) return;
+
+    const interval = setInterval(() => {
+      pendingDocs.forEach((doc) => {
+        handleRefresh(doc.signature_request_id!);
+      });
+    }, 8000); // Poll every 8 seconds
+
+    return () => clearInterval(interval);
+  }, [documents]);
+
   async function handleRefresh(signatureRequestId: string) {
     setRefreshing((prev) => ({ ...prev, [signatureRequestId]: true }));
     try {

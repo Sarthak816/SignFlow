@@ -4,21 +4,87 @@
 
 ---
 
-## Architecture
+## System Architecture
 
-```
-Browser (Next.js)
-      │
-      ▼
-SignFlow Backend (FastAPI)
-      │
-      ▼
-Setu Aadhaar eSign APIs
+```mermaid
+graph TD
+    subgraph Client ["Client Side (Browser)"]
+        A[Next.js Frontend]
+        C[Clerk Auth SDK]
+    end
+
+    subgraph Server ["Server Side (FastAPI / local or cloud)"]
+        B[FastAPI Backend]
+        D[PostgreSQL DB]
+    end
+
+    subgraph External ["Third-Party Services"]
+        E[Setu Aadhaar eSign Sandbox]
+        F[Clerk Identity Provider]
+    end
+
+    A -->|1. Authenticate| C
+    C -->|JWT| A
+    A -->|2. Proxy Request with Bearer Token| B
+    B -->|3. Verify Session Key| F
+    B -->|4. Persist Metadata| D
+    B -->|5. Outbound HTTP Call| E
 ```
 
 The frontend **never** communicates with Setu directly. All API calls — upload, create signature request, check status, download — are proxied through the FastAPI backend. Setu credentials live only in the backend `.env` and are never exposed to any client.
 
 ---
+
+## E2E Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Operations User (Priya)
+    participant Front as Next.js Frontend
+    participant Clerk as Clerk Auth
+    participant Back as FastAPI Backend
+    participant DB as PostgreSQL Database
+    participant Setu as Setu Aadhaar eSign API
+    actor Signer as Signer (Candidate)
+
+    User->>Front: Sign in & upload PDF + enter Signer Mobile
+    Front->>Clerk: Get Session Token
+    Clerk-->>Front: JWT Token
+    Front->>Back: POST /api/upload-contract (File + Signer Details + JWT)
+    Back->>Back: Verify Clerk JWT & validate PDF (magic bytes + size)
+    Back->>Back: Save PDF to temp/uploads storage
+    Back->>Setu: POST /api/documents (Upload PDF)
+    Setu-->>Back: Return setu_document_id
+    Back->>DB: Insert Document (status="uploaded")
+    Back->>Setu: POST /api/signature (Create Signature Request)
+    Setu-->>Back: Return setu_signature_id & signer_url
+    Back->>DB: Insert SignatureRequest & Signer (status="pending")
+    Back-->>Front: Return metadata & signer_url
+    Front-->>User: Display signing link & show "Pending" status
+
+    Note over User, Signer: User shares signing link with Signer
+    Signer->>Setu: Open signer_url, enter OTP, complete eSign
+    Setu-->>Signer: Redirect back to SignFlow / setu.co
+
+    Note over User, Front: Status checking (Manual or Poll every 8s)
+    Front->>Back: GET /api/signature-status/:id
+    Back->>Setu: GET /api/signature/:id
+    Setu-->>Back: Return latest status (e.g. "sign_complete")
+    Back->>DB: Update status to "signed" & save signed_at
+    Back-->>Front: Return updated status & details
+    Front-->>User: Update UI to "Signed" and show download button
+
+    User->>Front: Click "Download signed document"
+    Front->>Back: GET /api/download/:id
+    Back->>Setu: GET /api/documents/:id/download (Setu PDF bytes)
+    Setu-->>Back: Return signed PDF binary
+    Back-->>Front: Stream signed PDF binary
+    Front-->>User: Save signed PDF to disk
+```
+
+---
+
 
 ## Tech Stack
 
