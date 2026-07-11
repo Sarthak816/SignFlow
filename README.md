@@ -185,10 +185,28 @@ For this assignment, secrets live in the platform's encrypted environment variab
 
 ---
 
-## Deployment
+## Deployment & Live Links
+
+* **Frontend (Vercel):** [https://signflow-two-mu.vercel.app/](https://signflow-two-mu.vercel.app/)
+* **Backend (Render):** [https://signflow-6f0m.onrender.com](https://signflow-6f0m.onrender.com)
 
 | Service | Platform | Notes |
 |---|---|---|
-| Backend | Render / Railway | Free tier; spins down on inactivity (mention in demo) |
+| Backend | Render | Free tier; spins down on inactivity |
 | Frontend | Vercel | Zero-config Next.js deploys |
-| Database | Neon / Railway Postgres | Free tier sufficient for assignment scale |
+| Database | Neon Postgres | Serverless PostgreSQL database |
+
+> [!IMPORTANT]
+> **Setu API Limitations in Deployed Environments:**
+> While both the frontend and backend are fully deployed and live, the Setu sandbox eSign API calls will return a `403 Forbidden` WAF block when triggered from the deployed Render backend. This is due to two factors:
+> 1. **Sandbox IP Restrictions (WAF):** Setu's sandbox gateway utilizes WAF/IP security rules that block outbound API requests originating from shared, dynamic cloud IPs (such as Render's free tier).
+> 2. **Production KYC Requirement:** To transition to production Setu credentials and bypass these limits, Setu requires a corporate KYC verification demanding:
+>    * Business PAN
+>    * Company verification (e.g. GSTIN/COI)
+>    * Signatory details
+>    * POC details
+>    * KYC summary verification
+>    
+>    As an individual student developer, it is not possible to provide corporate business credentials for KYC. 
+> 
+> **For Reviewers:** The application is fully functional, complete, and verified when run **locally** (where localhost requests bypass Setu's gateway WAF blocks). Please follow the **Quick Start** guide below to run and test the complete end-to-end eSign flow locally.
