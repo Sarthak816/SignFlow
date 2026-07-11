@@ -197,16 +197,15 @@ For this assignment, secrets live in the platform's encrypted environment variab
 | Database | Neon Postgres | Serverless PostgreSQL database |
 
 > [!IMPORTANT]
-> **Setu API Limitations in Deployed Environments:**
-> While both the frontend and backend are fully deployed and live, the Setu sandbox eSign API calls will return a `403 Forbidden` WAF block when triggered from the deployed Render backend. This is due to two factors:
-> 1. **Sandbox Geo-Blocking & IP Restrictions:** Setu processes regulated identity and Aadhaar-based eSign transactions, which are subject to UIDAI and RBI data localization regulations. Consequently, Setu's gateway firewall employs **strict geo-blocking**, immediately rejecting requests originating outside India. Since Render does not host servers in India (using regions in US East/West or Europe), all outbound calls from Render's cloud servers are blocked.
-> 2. **Production KYC Requirement:** To transition to production Setu credentials (which allow setting up custom region routing or bypass constraints), Setu requires corporate KYC verification including:
->    * Business PAN
->    * Company type & business verification (e.g. GSTIN/COI)
->    * Signatory details
->    * POC details
->    * KYC summary verification
->    
->    As an individual student developer, it is not possible to complete corporate registration. 
+> **Setu API Geo-Blocking in Deployed Environments:**
+> While both the frontend and backend are fully deployed and live, the Setu sandbox eSign API calls will return a `403 Forbidden` WAF block when triggered from the deployed Render backend.
 > 
-> **For Reviewers:** The application is fully functional, complete, and verified when run **locally** within India (where your local IP bypasses Setu's geo-blocking WAF). Please follow the **Quick Start** guide below to run and test the complete end-to-end eSign flow locally.
+> * **The Cause:** Setu processes regulated identity and Aadhaar-based transactions, which are subject to strict Indian data localization guidelines. Consequently, Setu's sandbox gateway firewall employs **strict geo-blocking**, immediately rejecting requests originating outside India. Since Render does not host servers in India (using regions in US East/West or Europe), all outbound calls from Render's cloud servers are blocked.
+> 
+> **How to Test & Verify:**
+> 1. **Run Locally:** The application is fully functional, complete, and verified when run **locally** within India (where your local ISP IP bypasses Setu's geo-blocking WAF). Follow the **Quick Start** guide below.
+> 2. **Ngrok Tunneling (For Deployed Frontend Testing):** To test the live Vercel frontend end-to-end, you can tunnel your local backend using Ngrok set to the Indian region:
+>    ```bash
+>    ngrok http 127.0.0.1:8000 --region=in
+>    ```
+>    Point Vercel's `NEXT_PUBLIC_API_BASE_URL` to the generated Ngrok URL. Because the backend requests run through your local machine's Indian IP, all Setu API calls will succeed completely.
