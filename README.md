@@ -1,6 +1,8 @@
 # SignFlow
 
-> A Setu-powered contract upload and Aadhaar eSign platform. Upload a PDF, send it for legally valid e-signature, track status in real time, and download the signed document — all through a clean, self-serve interface.
+**Stage Completed: Stage 3 (Full-Stack Integration, Database Persistence & Real-time Polling Bonuses fully completed)**
+
+> A Setu-powered contract upload and Aadhaar eSign platform. Upload a PDF, send it for legally valid e-signature, track status in real time, and download the signed document, all through a clean, self-serve interface.
 
 ---
 
@@ -31,7 +33,7 @@ graph TD
     B -->|5. Outbound HTTP Call| E
 ```
 
-The frontend **never** communicates with Setu directly. All API calls — upload, create signature request, check status, download — are proxied through the FastAPI backend. Setu credentials live only in the backend `.env` and are never exposed to any client.
+The frontend **never** communicates with Setu directly. All API calls (upload, create signature request, check status, and download) are proxied through the FastAPI backend. Setu credentials live only in the backend `.env` and are never exposed to any client.
 
 ---
 
@@ -94,7 +96,7 @@ sequenceDiagram
 | Frontend | Next.js 15 (TypeScript) | App Router; file-based routing; trivial Vercel deployment |
 | Database | PostgreSQL | Relational integrity for documents → signature requests → signers |
 | ORM / Migrations | SQLAlchemy + Alembic | Versioned migrations; `alembic upgrade head` setup |
-| Auth | Clerk (magic-link) | Passwordless — no password database to leak; hosted provider |
+| Auth | Clerk (magic-link) | Passwordless (no password database to leak; hosted provider) |
 | HTTP Client | httpx | Async-native; used for all Setu API calls in the backend |
 
 ---
@@ -157,12 +159,12 @@ Full schema: [`docs/Technical_Architecture_SignFlow.md`](docs/Technical_Architec
 
 ## Security Considerations
 
-- **Credentials server-side only** — Setu's `x-client-id`, `x-client-secret`, and `x-product-instance-id` exist only in `backend/.env`. They are never referenced in any frontend file and never returned in any API response.
-- **Unguessable signing links** — every signing link uses a long random token, not a sequential ID. Guessing `/status/2` does not expose another user's contract.
-- **Row-level ownership** — every database query filters on `owner_id` (the authenticated Clerk user). No query path can return another user's documents.
-- **CORS locked to one origin** — the backend only accepts requests from `FRONTEND_URL`. Wildcard (`*`) is never used.
-- **Content-type validation** — uploaded files are validated by magic bytes (`%PDF-`), not just extension.
-- **No raw errors to the client** — a global exception handler ensures stack traces and DB errors never reach the browser.
+- **Credentials server-side only**: Setu's `x-client-id`, `x-client-secret`, and `x-product-instance-id` exist only in `backend/.env`. They are never referenced in any frontend file and never returned in any API response.
+- **Unguessable signing links**: Every signing link uses a long random token, not a sequential ID. Guessing `/status/2` does not expose another user's contract.
+- **Row-level ownership**: Every database query filters on `owner_id` (the authenticated Clerk user). No query path can return another user's documents.
+- **CORS locked to one origin**: The backend only accepts requests from `FRONTEND_URL`. Wildcard (`*`) is never used.
+- **Content-type validation**: Uploaded files are validated by magic bytes (`%PDF-`), not just extension.
+- **No raw errors to the client**: A global exception handler ensures stack traces and DB errors never reach the browser.
 
 ### Secrets in production
 
@@ -187,6 +189,6 @@ For this assignment, secrets live in the platform's encrypted environment variab
 
 | Service | Platform | Notes |
 |---|---|---|
-| Backend | Render / Railway | Free tier; spins down on inactivity — mention in demo |
+| Backend | Render / Railway | Free tier; spins down on inactivity (mention in demo) |
 | Frontend | Vercel | Zero-config Next.js deploys |
 | Database | Neon / Railway Postgres | Free tier sufficient for assignment scale |
