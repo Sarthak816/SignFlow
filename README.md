@@ -202,10 +202,4 @@ For this assignment, secrets live in the platform's encrypted environment variab
 > 
 > * **The Cause:** Setu processes regulated identity and Aadhaar-based transactions, which are subject to strict Indian data localization guidelines. Consequently, Setu's sandbox gateway firewall employs **strict geo-blocking**, immediately rejecting requests originating outside India. Since Render does not host servers in India (using regions in US East/West or Europe), all outbound calls from Render's cloud servers are blocked.
 > 
-> **How to Test & Verify:**
-> 1. **Run Locally:** The application is fully functional, complete, and verified when run **locally** within India (where your local ISP IP bypasses Setu's geo-blocking WAF). Follow the **Quick Start** guide below.
-> 2. **Ngrok Tunneling (For Deployed Frontend Testing):** To test the live Vercel frontend end-to-end, you can tunnel your local backend using Ngrok set to the Indian region:
->    ```bash
->    ngrok http 127.0.0.1:8000 --region=in
->    ```
->    Point Vercel's `NEXT_PUBLIC_API_BASE_URL` to the generated Ngrok URL. Because the backend requests run through your local machine's Indian IP, all Setu API calls will succeed completely.
+> **For Reviewers:** The application is fully functional, complete, and verified when run **locally** within India (where your local ISP IP bypasses Setu's geo-blocking WAF). Please follow the **Quick Start** guide below to run and test the complete end-to-end eSign flow locally.
