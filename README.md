@@ -188,18 +188,16 @@ For this assignment, secrets live in the platform's encrypted environment variab
 ## Deployment & Live Links
 
 * **Frontend (Vercel):** [https://signflow-two-mu.vercel.app/](https://signflow-two-mu.vercel.app/)
-* **Backend (Render):** [https://signflow-6f0m.onrender.com](https://signflow-6f0m.onrender.com)
+* **Backend (Ngrok Tunnel on 24/7 Indian Server):** [https://glenlike-mariela-epigynous.ngrok-free.dev](https://glenlike-mariela-epigynous.ngrok-free.dev)
 
 | Service | Platform | Notes |
 |---|---|---|
-| Backend | Render | Free tier; spins down on inactivity |
+| Backend | Local 24/7 Server | Hosted on an Indian server and tunneled via Ngrok |
 | Frontend | Vercel | Zero-config Next.js deploys |
 | Database | Neon Postgres | Serverless PostgreSQL database |
 
-> [!IMPORTANT]
-> **Setu API Geo-Blocking in Deployed Environments:**
-> While both the frontend and backend are fully deployed and live, the Setu sandbox eSign API calls will return a `403 Forbidden` WAF block when triggered from the deployed Render backend.
+> [!NOTE]
+> **Setu API Geo-Blocking and our Solution:**
+> Setu processes regulated identity and Aadhaar-based transactions, which are subject to strict Indian data localization guidelines. Consequently, Setu's sandbox gateway firewall employs **strict geo-blocking**, immediately rejecting requests originating outside India (such as standard Render/Railway US/EU data centers).
 > 
-> * **The Cause:** Setu processes regulated identity and Aadhaar-based transactions, which are subject to strict Indian data localization guidelines. Consequently, Setu's sandbox gateway firewall employs **strict geo-blocking**, immediately rejecting requests originating outside India. Since Render does not host servers in India (using regions in US East/West or Europe), all outbound calls from Render's cloud servers are blocked.
-> 
-> **For Reviewers:** The application is fully functional, complete, and verified when run **locally** within India (where your local ISP IP bypasses Setu's geo-blocking WAF). Please follow the **Quick Start** guide below to run and test the complete end-to-end eSign flow locally.
+> To bypass this restriction for the live deployed application, the backend is hosted on a **24/7 server located in India** and exposed via Ngrok. Because all API calls originate from an Indian IP range, the complete end-to-end eSign flow (upload, OTP verification, status polling, and downloads) works fully on the live Vercel URL.
