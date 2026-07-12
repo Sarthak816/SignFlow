@@ -17,6 +17,7 @@ async function apiFetch<T>(
     headers: {
       ...options.headers,
       Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "true",
     },
   });
 
@@ -80,7 +81,10 @@ export async function downloadSignedDocument(
   signatureRequestId: string
 ): Promise<Blob> {
   const res = await fetch(`${BASE}/api/download/${signatureRequestId}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "true",
+    },
   });
 
   if (!res.ok) {
